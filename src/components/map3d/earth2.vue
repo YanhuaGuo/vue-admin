@@ -11,11 +11,12 @@ import { RenderPass } from "./jsm/postprocessing/RenderPass.js";
 import { FilmPass } from "./jsm/postprocessing/FilmPass.js";
 
 import {drawThreeGeo} from './js/threeGeoJSON';
+import {util} from './js/util';
 export default {
   name: "v-earth",
-  props: {
-    points: Array,    
-  },
+  props: [
+    'points','x','y' 
+  ],
   data() {
     return {
       camera:null, 
@@ -33,6 +34,17 @@ export default {
       rotationSpeed:0.02,
 
       cachePoints: [],
+    }
+  },
+  watch:{
+    x(val){       
+        //this.camera.position.set(this.x,this.y,this.z);
+    },
+    y(val){       
+        //this.camera.position.set(this.x,this.y,this.z);
+    },
+    z(val){       
+        //this.camera.position.set(this.x,this.y,this.z);
     }
   },
   methods: {
@@ -73,7 +85,7 @@ export default {
       this.scene = new THREE.Scene();
       this.scene.background = this.textureLoader.load( require('./textures/planets/bg.jpg') );
       this.camera = new THREE.PerspectiveCamera(45, this.SCREEN_WIDTH / this.SCREEN_HEIGHT, 0.1, 1000);
-      this.camera.position.set(200, 0, 0);
+      this.camera.position.set(-31,113,80);
       this.camera.up.set(0, 0, 1);
       this.camera.lookAt(this.scene.position);
 
@@ -93,11 +105,18 @@ export default {
       this.earth.rotation.x = Math.PI / 2;
       this.scene.add(this.earth);
       let data = require('./js/word.geojson');
-      console.log('111');
-          drawThreeGeo(data, 51, 'sphere', {
-              color: 0x00ff00,
-              transparent: false
-          }, this.earth)
+      
+      drawThreeGeo(data, 51, 'sphere', {
+          color: 0x00ff00,
+          transparent: false
+      }, this.earth);
+
+      let china = require('./js/china.json');
+      const chinaData = util.decode(china);      
+      drawThreeGeo(chinaData, 51, 'sphere', {
+        color: 0x00ff00,
+        transparent: false
+      }, this.earth)
         
         //cloud
        var materialClouds = new THREE.MeshBasicMaterial({
@@ -107,9 +126,12 @@ export default {
           transparent: true
       });
 
+    
       this.meshClouds = new THREE.Mesh(geometry, materialClouds);
       this.meshClouds.scale.set(this.cloudsScale, this.cloudsScale, this.cloudsScale);
       this.scene.add( this.meshClouds );
+      this.meshClouds.rotation.x = this.x;
+      this.meshClouds.rotation.y = this.y;
 
       this.renderer = new THREE.WebGLRenderer({ antialias: true ,alpha: true});
       this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -119,6 +141,10 @@ export default {
       //
       var controls = new OrbitControls(this.camera, this.renderer.domElement);
       controls.update();
+      controls.addEventListener('change',(ev)=>{
+        console.log(ev.target.object)
+      });
+      //controls.maxZoom = 
       //
 
       this.stats = new Stats();
@@ -135,6 +161,8 @@ export default {
 
       this.composer.addPass(renderModel);
       this.composer.addPass(effectFilm);
+      const axesHelper = new THREE.AxisHelper(100);
+      this.scene.add(axesHelper);
     },
     onWindowResize() {
       var mapPanel = document.getElementById("map-container");
@@ -158,11 +186,11 @@ export default {
 
     render() {
       // rotate the planet and clouds
-
       var delta = this.clock.getDelta();
 
-      //this.meshPlanet.rotation.y += this.rotationSpeed * delta;
+      //this.meshClouds.rotation.y += this.rotationSpeed * delta;
       //this.meshClouds.rotation.y += 1.25 * this.rotationSpeed * delta;
+      //this.earth.rotation.y += 1.25 * this.rotationSpeed * delta;
 
       // slow down as we approach the surface
       this.dPlanet = this.camera.position.length();
@@ -214,9 +242,8 @@ export default {
 
     
     this.drawPoints();
-    console.log('camera.position')
-    console.log(this.camera.position)
-    console.log(this.cachePoints[0].position)
+  
+     
   }//end mounted
 };
 </script>
