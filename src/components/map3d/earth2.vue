@@ -2,6 +2,7 @@
   <div id="map-container"></div>
 </template>
 <script>
+window.earth = {};
 import * as THREE from "../build/three.module";
 import Stats from "./jsm/libs/stats.module.js";
 import { OrbitControls } from "./jsm/controls/OrbitControls.js";
@@ -19,20 +20,6 @@ export default {
   ],
   data() {
     return {
-      camera:null, 
-      controls:null, 
-      renderer:null,  
-      stats:null, 
-      geometry:null,  
-      meshPlanet:null,  
-      meshClouds:null,  
-      meshMoon:null, 
-      dirLight:null, 
-      composer:null, 
-      dPlanet:null,
-      MARGIN:0,
-      rotationSpeed:0.02,
-
       cachePoints: [],
     }
   },
@@ -57,10 +44,10 @@ export default {
         let point = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.5,0.5), new THREE.MeshBasicMaterial({
             color:0xff0000
         }));
-        point.position.copy(this.lglt2xyz(...d.position, this.radius))
+        point.position.copy(this.lglt2xyz(...d.position, earth.radius))
         point.lookAt(new THREE.Vector3())
         point.name = i
-        this.scene.add(point)
+        earth.scene.add(point)
         this.cachePoints.push(point)
       }
     },
@@ -74,20 +61,14 @@ export default {
         );
     },
     init() {
-      // this.camera = new THREE.PerspectiveCamera(
-      //   45,
-      //   this.SCREEN_WIDTH / this.SCREEN_HEIGHT,
-      //   50,
-      //   1e7
-      // );
-      // this.camera.position.z = this.radius * 5;
-
-      this.scene = new THREE.Scene();
-      this.scene.background = this.textureLoader.load( require('./textures/planets/bg.jpg') );
-      this.camera = new THREE.PerspectiveCamera(45, this.SCREEN_WIDTH / this.SCREEN_HEIGHT, 0.1, 1000);
-      this.camera.position.set(-31,113,80);
-      this.camera.up.set(0, 0, 1);
-      this.camera.lookAt(this.scene.position);
+      
+      
+      earth.scene = new THREE.Scene();
+      earth.scene.background = earth.textureLoader.load( require('./textures/planets/bg.jpg') );
+      earth.camera = new THREE.PerspectiveCamera(45, earth.SCREEN_WIDTH / earth.SCREEN_HEIGHT, 0.1, 1000);
+      earth.camera.position.set(-31,113,80);
+      earth.camera.up.set(0, 0, 1);
+      earth.camera.lookAt(earth.scene.position);
 
        
       
@@ -100,137 +81,144 @@ export default {
 
       // planet
       let geometry = new THREE.SphereGeometry(50, 42, 42)
-      this.earth = new THREE.Mesh(geometry, material);
-      this.earth.rotation.y = Math.PI / 2;
-      this.earth.rotation.x = Math.PI / 2;
-      this.scene.add(this.earth);
+      let earthMesh = new THREE.Mesh(geometry, material);
+      earthMesh.rotation.y = Math.PI / 2;
+      earthMesh.rotation.x = Math.PI / 2;
+      earth.scene.add(earthMesh);
       let data = require('./js/word.geojson');
       
       drawThreeGeo(data, 51, 'sphere', {
           color: 0x00ff00,
           transparent: false
-      }, this.earth);
+      }, earthMesh);
 
       let china = require('./js/china.json');
       const chinaData = util.decode(china);      
       drawThreeGeo(chinaData, 51, 'sphere', {
         color: 0x00ff00,
         transparent: false
-      }, this.earth)
+      }, earthMesh)
         
         //cloud
        var materialClouds = new THREE.MeshBasicMaterial({
-          map: this.textureLoader.load(
+          map: earth.textureLoader.load(
             require("./textures/planets/earth_atmos_2048.jpg")
           ),
           transparent: true
       });
 
     
-      this.meshClouds = new THREE.Mesh(geometry, materialClouds);
-      this.meshClouds.scale.set(this.cloudsScale, this.cloudsScale, this.cloudsScale);
-      this.scene.add( this.meshClouds );
-      this.meshClouds.rotation.x = this.x;
-      this.meshClouds.rotation.y = this.y;
+      let meshClouds = new THREE.Mesh(geometry, materialClouds);
+      meshClouds.scale.set(earth.cloudsScale, earth.cloudsScale, earth.cloudsScale);
+      earth.scene.add( meshClouds );
+      meshClouds.rotation.x = this.x;
+      meshClouds.rotation.y = this.y;
+      earth.meshClouds = meshClouds;
 
-      this.renderer = new THREE.WebGLRenderer({ antialias: true ,alpha: true});
-      this.renderer.setPixelRatio(window.devicePixelRatio);
-      this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
-      this.mapPanel.appendChild(this.renderer.domElement);
+      earth.renderer = new THREE.WebGLRenderer({ antialias: true ,alpha: true});
+      earth.renderer.setPixelRatio(window.devicePixelRatio);
+      earth.renderer.setSize(earth.SCREEN_WIDTH, earth.SCREEN_HEIGHT);
+      earth.mapPanel.appendChild(earth.renderer.domElement);
 
       //
-      var controls = new OrbitControls(this.camera, this.renderer.domElement);
+      var controls = new OrbitControls(earth.camera, earth.renderer.domElement);
       controls.update();
       controls.addEventListener('change',(ev)=>{
-        console.log(ev.target.object)
+        //console.log(ev.target.object)
       });
       //controls.maxZoom = 
       //
 
-      this.stats = new Stats();
-      this.mapPanel.appendChild(this.stats.dom);
+      earth.stats = new Stats();
+      earth.mapPanel.appendChild(earth.stats.dom);
 
       window.addEventListener("resize", this.onWindowResize, false);
 
       // postprocessing
 
-      var renderModel = new RenderPass(this.scene, this.camera);
-      var effectFilm = new FilmPass(0.35, 0.75, 2048, false);
+      let renderModel = new RenderPass(earth.scene, earth.camera);
+      let effectFilm = new FilmPass(0.35, 0.75, 2048, false);
 
-      this.composer = new EffectComposer(this.renderer);
+      earth.composer = new EffectComposer(earth.renderer);
 
-      this.composer.addPass(renderModel);
-      this.composer.addPass(effectFilm);
+      earth.composer.addPass(renderModel);
+      earth.composer.addPass(effectFilm);
       const axesHelper = new THREE.AxisHelper(100);
-      this.scene.add(axesHelper);
+      earth.scene.add(axesHelper);
     },
     onWindowResize() {
-      var mapPanel = document.getElementById("map-container");
+      if(!earth.animateID){
+        return;
+      }
+      let mapPanel = document.getElementById("map-container");
 
-      this.SCREEN_HEIGHT = mapPanel.clientHeight;
-      this.SCREEN_WIDTH = mapPanel.clientWidth;
+      earth.SCREEN_HEIGHT = mapPanel.clientHeight;
+      earth.SCREEN_WIDTH = mapPanel.clientWidth;
 
-      this.camera.aspect = this.SCREEN_WIDTH / this.SCREEN_HEIGHT;
-      this.camera.updateProjectionMatrix();
+      earth.camera.aspect = earth.SCREEN_WIDTH / earth.SCREEN_HEIGHT;
+      earth.camera.updateProjectionMatrix();
 
-      this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
-      this.composer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+      earth.renderer.setSize(earth.SCREEN_WIDTH, earth.SCREEN_HEIGHT);
+      earth.composer.setSize(earth.SCREEN_WIDTH, earth.SCREEN_HEIGHT);
     },
 
     animate() {
-      requestAnimationFrame(this.animate);
+      earth.animateID = requestAnimationFrame(this.animate);
 
       this.render();
-      this.stats.update();
+      earth.stats.update();
+      console.log('requestAnimationFrame');
     },
 
     render() {
       // rotate the planet and clouds
-      var delta = this.clock.getDelta();
+      var delta = earth.clock.getDelta();
 
       //this.meshClouds.rotation.y += this.rotationSpeed * delta;
       //this.meshClouds.rotation.y += 1.25 * this.rotationSpeed * delta;
       //this.earth.rotation.y += 1.25 * this.rotationSpeed * delta;
 
       // slow down as we approach the surface
-      this.dPlanet = this.camera.position.length();
+      earth.dPlanet = earth.camera.position.length();
 
-      this.composer.render(delta);
+      earth.composer.render(delta);
     }
   },
-  created() {
-    
+  destroyed() {
+    cancelAnimationFrame(earth.animateID);
+    earth.animateID = 0;
+    for(let k in earth){
+      earth[k] = null;
+    }
   },
-  beforeMount() {
-    
-  },
+   
   mounted() {
     
-    this.mapPanel = document.getElementById("map-container");
-    this.panelHeight = this.mapPanel.clientHeight;
-    this.panelWidth = this.mapPanel.clientWidth;
+    earth.mapPanel = document.getElementById("map-container");
+    earth.panelHeight = earth.mapPanel.clientHeight;
+    earth.panelWidth = earth.mapPanel.clientWidth;
 
-    this.radius = 50;//6371;
-    this.tilt = 0.41;
-    this.rotationSpeed = 0.02;
+    earth.radius = 50;//6371;
+    earth.tilt = 0.41;
+    earth.rotationSpeed = 0.02;
 
-    this.cloudsScale = 1.005;
-    this.moonScale = 0.23;
+    earth.cloudsScale = 1.005;
+    earth.moonScale = 0.23;
 
-    this.MARGIN = 0;
-    this.SCREEN_HEIGHT = this.panelHeight - this.MARGIN * 2;
-    this.SCREEN_WIDTH = this.panelWidth;
+    earth.MARGIN = 0;
+    earth.SCREEN_HEIGHT = earth.panelHeight - earth.MARGIN * 2;
+    earth.SCREEN_WIDTH = earth.panelWidth;
 
     
 
-    this.textureLoader = new THREE.TextureLoader();
+    earth.textureLoader = new THREE.TextureLoader();
 
     var d,
       //dPlanet,
       dMoon,
       dMoonVec = new THREE.Vector3();
 
-    this.clock = new THREE.Clock();
+    earth.clock = new THREE.Clock();
 
     this.init();
     this.render();
