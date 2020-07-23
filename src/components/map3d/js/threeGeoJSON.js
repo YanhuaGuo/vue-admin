@@ -244,4 +244,50 @@ const drawThreeGeo = (json, radius, shape, materalOptions, container) => {
     }
 }
 
-export {drawThreeGeo}
+const drawModel = (points, color = "#ff0000") =>{
+    const shape = new THREE.Shape();
+    points.forEach((d, i) => {
+      const [x, y] = d;
+      if (i === 0) {
+        shape.moveTo(x, y);
+      } else if (i === points.length - 1) {
+        shape.quadraticCurveTo(x, y, x, y);
+      } else {
+        shape.lineTo(x, y, x, y);
+      }
+    });
+
+    const geometry = new THREE.ExtrudeGeometry(shape, {
+      amount: -2,
+      bevelEnabled: false
+    });
+    const material = new THREE.MeshBasicMaterial({
+      color: color,
+      transparent: true,
+      opacity: 0.6,
+      side: THREE.DoubleSide
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    return mesh;
+  }
+
+  
+  const drawLine = (points) => {
+    const material = new THREE.LineBasicMaterial({
+      color: '#ccc',
+      transparent: true,
+      opacity: 0.7
+    });
+    const geometry = new THREE.Geometry();
+    points.forEach(d => {
+      const [x, y, z] = d;
+      geometry.vertices.push(new THREE.Vector3(x, y, z + 0.1));
+    });
+    const line = new THREE.Line(geometry, material);
+    return line;
+  }
+export {
+    drawThreeGeo,
+    drawModel,
+    drawLine
+}

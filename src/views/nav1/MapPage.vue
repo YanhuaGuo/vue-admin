@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import earth from "../../components/map3d/earth2";
+import earth from "../../components/map3d/earth3";
 
 export default {
   data() {
@@ -30,7 +30,10 @@ export default {
       staffs:[{
         position: [120.267365,35.98903],
         title: 'Point Test'
-    }]
+      }],
+      areas: [
+
+      ]
     };
   },
   watch:{

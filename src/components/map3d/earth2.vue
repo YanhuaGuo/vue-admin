@@ -11,8 +11,9 @@ import { EffectComposer } from "./jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "./jsm/postprocessing/RenderPass.js";
 import { FilmPass } from "./jsm/postprocessing/FilmPass.js";
 
-import {drawThreeGeo} from './js/threeGeoJSON';
+import {drawThreeGeo,drawModel,drawLine} from './js/threeGeoJSON';
 import {util} from './js/util';
+import * as d3 from 'd3-geo';
 export default {
   name: "v-earth",
   props: [
@@ -39,6 +40,7 @@ export default {
       if(!this.points.length){
         return;
       }
+      this.cachePoints = [];
       //console.log('start draw points');
       for(let [i, d] of this.points.entries()){
         let point = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.5,0.5), new THREE.MeshBasicMaterial({
@@ -50,6 +52,17 @@ export default {
         earth.scene.add(point)
         this.cachePoints.push(point)
       }
+var areas = [[113.62024,31.837798],
+            [115.883108,30.985746],
+            [114.650489,29.548488],
+            [113.105116,29.949854],
+            [113.270692,30.827104],
+            [113.62024,31.837798]] ;
+      const group = new THREE.Group();
+      let mesh = drawModel(areas);
+      group.add(mesh);
+      earth.scene.add(group);
+
     },
     lglt2xyz (lg, lt, r) {
         lg = lg * Math.PI / 180
@@ -60,6 +73,24 @@ export default {
             Math.sin(lt) * r
         );
     },
+    /**
+   * @desc 经纬度转换成墨卡托投影
+   * @param {array} 传入经纬度
+   * @return array [x,y,z]
+   */
+  lnglatToMector(lnglat) {
+    if (!earth.projection) {
+      earth.projection = d3
+        .geoMercator()
+        .center([108.904496, 32.668849])
+        .scale(80)
+        .rotate(Math.PI / 4)
+        .translate([0, 0]);
+    }
+    const [y, x] = earth.projection([...lnglat]);
+    let z = 0;
+    return [x, y, z];
+  },
     init() {
       
       
@@ -97,7 +128,62 @@ export default {
       drawThreeGeo(chinaData, 51, 'sphere', {
         color: 0x00ff00,
         transparent: false
-      }, earthMesh)
+      }, earthMesh);
+      /*
+      //二维中国地图块
+      // 把经纬度转换成x,y,z 坐标
+    chinaData.features.forEach(d => {
+      d.vector3 = [];
+      d.geometry.coordinates.forEach((coordinates, i) => {
+        d.vector3[i] = [];
+        coordinates.forEach((c, j) => {
+          if (c[0] instanceof Array) {
+            d.vector3[i][j] = [];
+            c.forEach(cinner => {
+              let cp = this.lnglatToMector(cinner);
+              d.vector3[i][j].push(cp);
+            });
+          } else {
+            let cp = this.lnglatToMector(c);
+            d.vector3[i].push(cp);
+          }
+        });
+      });
+    });
+    // 绘制地图模型
+    const group = new THREE.Group();
+    const lineGroup = new THREE.Group();
+    chinaData.features.forEach(d => {
+      const g = new THREE.Group(); // 用于存放每个地图模块。||省份
+      g.data = d;
+      d.vector3.forEach(points => {
+        // 多个面
+        if (points[0][0] instanceof Array) {
+          points.forEach(p => {
+            const mesh = drawModel(p);
+            const lineMesh = drawLine(p);
+            lineGroup.add(lineMesh);
+            g.add(mesh);
+          });
+        } else {
+          // 单个面
+          const mesh = drawModel(points);
+          const lineMesh = drawLine(points);
+          lineGroup.add(lineMesh);
+          g.add(mesh);
+        }
+      });
+      group.add(g);
+    });
+    earth.groupMapCn = group; // 丢到全局去
+    const lineGroupBottom = lineGroup.clone();
+    lineGroupBottom.position.z = -2;
+    earth.scene.add(lineGroup);
+    earth.scene.add(lineGroupBottom);
+    earth.scene.add(group);
+    earth.groupMapCn.position.x = -10;earth.groupMapCn.position.y = 50; earth.groupMapCn.position.z = 20;
+earth.groupMapCn.rotation.x=-1,earth.groupMapCn.rotation.y=0,earth.groupMapCn.rotation.z =1.50;
+    */
         
         //cloud
        var materialClouds = new THREE.MeshBasicMaterial({
@@ -143,8 +229,8 @@ export default {
 
       earth.composer.addPass(renderModel);
       earth.composer.addPass(effectFilm);
-      const axesHelper = new THREE.AxisHelper(100);
-      earth.scene.add(axesHelper);
+      earth.axesHelper = new THREE.AxisHelper(100);
+      earth.scene.add(earth.axesHelper);      
     },
     onWindowResize() {
       if(!earth.animateID){

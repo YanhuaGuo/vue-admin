@@ -35,6 +35,7 @@ let routes = [
             { path: '/form', component: Form, name: 'Form' },
             { path: '/user', component: user, name: '列表' },
             { path: '/map', component: map, name: 'Earth Demo' },
+            { path: '/map3', component: map, name: 'earth giojs' },
         ]
     },
     {
