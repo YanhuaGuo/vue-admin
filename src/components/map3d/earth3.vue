@@ -2,9 +2,8 @@
   <div id="map-container"></div>
 </template>
 <script>
-import * as THREE from "../build/three.module";
-
-import * as Gio from "./js/gio.module";
+import * as THREE from "../build/three.module.js";
+import * as GIO from "./js/gio.module.js";
 import { drawThreeGeo, drawModel, drawLine } from "./js/threeGeoJSON";
 import {util} from './js/util';
 export default {
@@ -12,15 +11,38 @@ export default {
   props: ["points", "x", "y"],
   data() {
     return {
-      configs: {
-        control: {
+      
+    }
+  },
+  watch: {},
+  methods: {
+    drawProvince(){
+      
+      //  let andyMesh = giojs.getScene().children[3].getObjectByName('sphere')       
+      //  let china = require('./js/china.json');
+      //  const chinaData = util.decode(china);      
+      //  drawThreeGeo(chinaData, 110, 'sphere', {
+      //    color: 0xff0000,
+      //    transparent: false
+      //  }, andyMesh);
+       
+    }
+  },
+
+  destroyed() {},
+
+  mounted() {
+    let container = document.getElementById("map-container");
+    let controller = new GIO.Controller(container);
+    controller.configure({
+      control: {
           stats: true,
           disableUnmentioned: false,
           lightenMentioned: true,
           inOnly: true,
           outOnly: true,
           initCountry: "CN",
-          halo: true,
+          halo: false,
         },
 
         color: {
@@ -37,30 +59,20 @@ export default {
           mentioned: 0.5,
           related: 0.5,
         }
-      },
-    };
-  },
-  watch: {},
-  methods: {
-    drawProvince(){
-      let china = require('./js/china.json');
-      const chinaData = util.decode(china);      
-      // drawThreeGeo(chinaData, 101, 'sphere', {
-      //   color: 0x00ff00,
-      //   transparent: false
-      // }, globe.getScene().children[5]);
-    }
-  },
-
-  destroyed() {},
-
-  mounted() {
-    let container = document.getElementById("map-container");
-    window.globe = new Gio.Controller(container, this.configs);
+      });
     // 初始化并渲染地球
-    window.globe.init();
+    controller.init();
+  
+    // let axesHelper = new THREE.AxisHelper(200);
+    // let scene = controller.getScene()
+    // if(scene!=null){
+    //   console.log('scene.add(axesHelper);')
+    //   scene.add(axesHelper);
+    // }
     this.drawProvince();
-  }, //end mounted
+    window.giojs = controller;
+    console.log(controller)
+  }//end mounted
 };
 </script>
 <style lang="scss" scoped>

@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import earth from "../../components/map3d/earth3";
+import earth from "../../components/map3d/earth2";
 
 export default {
   data() {

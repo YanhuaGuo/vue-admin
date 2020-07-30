@@ -47,21 +47,24 @@ export default {
             color:0xff0000
         }));
         point.position.copy(this.lglt2xyz(...d.position, earth.radius))
+        console.log('coord convert:');
+        console.log(point.position);
+        point.position.z +=1;
         point.lookAt(new THREE.Vector3())
         point.name = i
         earth.scene.add(point)
         this.cachePoints.push(point)
       }
-var areas = [[113.62024,31.837798],
-            [115.883108,30.985746],
-            [114.650489,29.548488],
-            [113.105116,29.949854],
-            [113.270692,30.827104],
-            [113.62024,31.837798]] ;
-      const group = new THREE.Group();
-      let mesh = drawModel(areas);
-      group.add(mesh);
-      earth.scene.add(group);
+// var areas = [[113.62024,31.837798],
+//             [115.883108,30.985746],
+//             [114.650489,29.548488],
+//             [113.105116,29.949854],
+//             [113.270692,30.827104],
+//             [113.62024,31.837798]] ;
+//       const group = new THREE.Group();
+//       let mesh = drawModel(areas);
+//       group.add(mesh);
+//       earth.scene.add(group);
 
     },
     lglt2xyz (lg, lt, r) {
@@ -88,7 +91,7 @@ var areas = [[113.62024,31.837798],
         .translate([0, 0]);
     }
     const [y, x] = earth.projection([...lnglat]);
-    let z = 0;
+    let z = 5;
     return [x, y, z];
   },
     init() {
@@ -111,79 +114,79 @@ var areas = [[113.62024,31.837798],
       })
 
       // planet
-      let geometry = new THREE.SphereGeometry(50, 42, 42)
+      let geometry = new THREE.SphereGeometry(earth.radius, 42, 42)
       let earthMesh = new THREE.Mesh(geometry, material);
       earthMesh.rotation.y = Math.PI / 2;
       earthMesh.rotation.x = Math.PI / 2;
       earth.scene.add(earthMesh);
       let data = require('./js/word.geojson');
       
-      drawThreeGeo(data, 51, 'sphere', {
+      drawThreeGeo(data, earth.radius+1, 'sphere', {
           color: 0x00ff00,
           transparent: false
       }, earthMesh);
 
       let china = require('./js/china.json');
       const chinaData = util.decode(china);      
-      drawThreeGeo(chinaData, 51, 'sphere', {
+      drawThreeGeo(chinaData, earth.radius+1, 'sphere', {
         color: 0x00ff00,
         transparent: false
       }, earthMesh);
-      /*
+      
       //二维中国地图块
       // 把经纬度转换成x,y,z 坐标
-    chinaData.features.forEach(d => {
-      d.vector3 = [];
-      d.geometry.coordinates.forEach((coordinates, i) => {
-        d.vector3[i] = [];
-        coordinates.forEach((c, j) => {
-          if (c[0] instanceof Array) {
-            d.vector3[i][j] = [];
-            c.forEach(cinner => {
-              let cp = this.lnglatToMector(cinner);
-              d.vector3[i][j].push(cp);
-            });
-          } else {
-            let cp = this.lnglatToMector(c);
-            d.vector3[i].push(cp);
-          }
-        });
-      });
-    });
-    // 绘制地图模型
-    const group = new THREE.Group();
-    const lineGroup = new THREE.Group();
-    chinaData.features.forEach(d => {
-      const g = new THREE.Group(); // 用于存放每个地图模块。||省份
-      g.data = d;
-      d.vector3.forEach(points => {
-        // 多个面
-        if (points[0][0] instanceof Array) {
-          points.forEach(p => {
-            const mesh = drawModel(p);
-            const lineMesh = drawLine(p);
-            lineGroup.add(lineMesh);
-            g.add(mesh);
-          });
-        } else {
-          // 单个面
-          const mesh = drawModel(points);
-          const lineMesh = drawLine(points);
-          lineGroup.add(lineMesh);
-          g.add(mesh);
-        }
-      });
-      group.add(g);
-    });
-    earth.groupMapCn = group; // 丢到全局去
-    const lineGroupBottom = lineGroup.clone();
-    lineGroupBottom.position.z = -2;
-    earth.scene.add(lineGroup);
-    earth.scene.add(lineGroupBottom);
-    earth.scene.add(group);
-    earth.groupMapCn.position.x = -10;earth.groupMapCn.position.y = 50; earth.groupMapCn.position.z = 20;
-earth.groupMapCn.rotation.x=-1,earth.groupMapCn.rotation.y=0,earth.groupMapCn.rotation.z =1.50;
-    */
+    // chinaData.features.forEach(d => {
+    //   d.vector3 = [];
+    //   d.geometry.coordinates.forEach((coordinates, i) => {
+    //     d.vector3[i] = [];
+    //     coordinates.forEach((c, j) => {
+    //       if (c[0] instanceof Array) {
+    //         d.vector3[i][j] = [];
+    //         c.forEach(cinner => {
+    //           let cp = this.lnglatToMector(cinner);
+    //           d.vector3[i][j].push(cp);
+    //         });
+    //       } else {
+    //         let cp = this.lnglatToMector(c);
+    //         d.vector3[i].push(cp);
+    //       }
+    //     });
+    //   });
+    // });
+    // // 绘制地图模型
+    // const group = new THREE.Group();
+    // const lineGroup = new THREE.Group();
+    // chinaData.features.forEach(d => {
+    //   const g = new THREE.Group(); // 用于存放每个地图模块。||省份
+    //   g.data = d;
+    //   d.vector3.forEach(points => {
+    //     // 多个面
+    //     if (points[0][0] instanceof Array) {
+    //       points.forEach(p => {
+    //         const mesh = drawModel(p);
+    //         const lineMesh = drawLine(p);
+    //         lineGroup.add(lineMesh);
+    //         g.add(mesh);
+    //       });
+    //     } else {
+    //       // 单个面
+    //       const mesh = drawModel(points);
+    //       const lineMesh = drawLine(points);
+    //       lineGroup.add(lineMesh);
+    //       g.add(mesh);
+    //     }
+    //   });
+    //   group.add(g);
+    // });
+    // earth.groupMapCn = group; // 丢到全局去
+    // const lineGroupBottom = lineGroup.clone();
+    // lineGroupBottom.position.z = -2;
+    // earth.scene.add(lineGroup);
+    // earth.scene.add(lineGroupBottom);
+    // earth.scene.add(group);
+    // earth.groupMapCn.position.x = -10;earth.groupMapCn.position.y = 50; earth.groupMapCn.position.z = 20;
+    // earth.groupMapCn.rotation.x=-1,earth.groupMapCn.rotation.y=0,earth.groupMapCn.rotation.z =1.50;
+    
         
         //cloud
        var materialClouds = new THREE.MeshBasicMaterial({
@@ -253,7 +256,7 @@ earth.groupMapCn.rotation.x=-1,earth.groupMapCn.rotation.y=0,earth.groupMapCn.ro
 
       this.render();
       earth.stats.update();
-      console.log('requestAnimationFrame');
+      //console.log('requestAnimationFrame');
     },
 
     render() {
