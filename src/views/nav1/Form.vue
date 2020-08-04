@@ -1,7 +1,16 @@
 <template>
+	<div>
 	<el-form ref="form" :model="form" label-width="80px" @submit.prevent="onSubmit" style="margin:20px;width:60%;min-width:600px;">
 		<el-form-item label="活动名称">
-			<el-input v-model="form.name"></el-input>
+			<el-col :span="8">
+				<el-input v-model="form.name"></el-input>
+			</el-col>
+			<el-col :span="2"><span>{{dialogOpen}}</span></el-col>
+			<el-col :span="2">
+				
+				<el-button @click="dialogOpen=true">选择</el-button>
+			</el-col>
+			
 		</el-form-item>
 		<el-form-item label="活动区域">
 			<el-select v-model="form.region" placeholder="请选择活动区域">
@@ -43,12 +52,19 @@
 			<el-button @click.native.prevent>取消</el-button>
 		</el-form-item>
 	</el-form>
+	<selector :dialogVisible="dialogOpen" 
+	@dialogClosed="dialogOpen=false"
+	@selectOk="selectOk"></selector>	
+	</div>
 </template>
 
 <script>
+import selector from '../../components/selector';
 	export default {
+		components:{selector},
 		data() {
 			return {
+				dialogOpen:false,
 				form: {
 					name: '',
 					region: '',
@@ -62,6 +78,9 @@
 			}
 		},
 		methods: {
+			selectOk(v){
+				console.log(v);
+			},
 			onSubmit() {
 				console.log('submit!');
 			}

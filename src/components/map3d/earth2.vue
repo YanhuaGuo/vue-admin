@@ -132,6 +132,7 @@ export default {
         color: 0x00ff00,
         transparent: false
       }, earthMesh);
+      earth.earthMesh = earthMesh;
       
       //二维中国地图块
       // 把经纬度转换成x,y,z 坐标
@@ -263,8 +264,8 @@ export default {
       // rotate the planet and clouds
       var delta = earth.clock.getDelta();
 
-      //this.meshClouds.rotation.y += this.rotationSpeed * delta;
-      //this.meshClouds.rotation.y += 1.25 * this.rotationSpeed * delta;
+      // earth.meshClouds.rotation.y += earth.rotationSpeed * delta;
+      // earth.earthMesh.rotation.y += earth.rotationSpeed * delta;
       //this.earth.rotation.y += 1.25 * this.rotationSpeed * delta;
 
       // slow down as we approach the surface
