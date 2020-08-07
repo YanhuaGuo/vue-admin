@@ -1,8 +1,8 @@
-<template>
+<template> 
 	<div>
 	<el-form ref="form" :model="form" label-width="80px" @submit.prevent="onSubmit" style="margin:20px;width:60%;min-width:600px;">
-		<el-form-item label="活动名称">
-			<el-col :span="8">
+		<el-form-item label="活动名称"> 
+			<el-col :span="8"> 
 				<el-input v-model="form.name"></el-input>
 			</el-col>
 			<el-col :span="2"><span>{{dialogOpen}}</span></el-col>

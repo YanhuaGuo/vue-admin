@@ -237,7 +237,7 @@ const drawThreeGeo = (json, radius, shape, materalOptions, container) => {
         }
     }
 
-    function clearArrays() {
+    function clearArrays() { 
         x_values.length = 0;
         y_values.length = 0;
         z_values.length = 0;

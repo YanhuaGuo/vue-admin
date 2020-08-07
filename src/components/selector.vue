@@ -1,12 +1,12 @@
-<template>
+<template> 
   <el-dialog title="XX选择器" width="30%" :visible.sync="dialogVisible">
-    <span>选择。。。</span>
+    <span>选择。。。</span>   
     <span slot="footer" class="dialog-footer">
       <el-button @click="handleClosed">取 消</el-button>
       <el-button type="primary" @click="handleOk">确 定</el-button>
-    </span>
-  </el-dialog>
-</template>
+    </span>   
+  </el-dialog>  
+</template> 
 
 <script>
 export default {
